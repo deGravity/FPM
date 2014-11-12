@@ -28,21 +28,23 @@ pupil_mask = pupil(X, Y);
 % Generate the locations of the frequency domain samples
 edges = generate_sample_edges(x_res, y_res, low_x_res, low_y_res, x_increment, y_increment);
 num_images = size(edges, 2);
-errors = zeros(num_images,1);
-
+num_loops = 10;
+errors = zeros(num_images*num_loops,1);
+for j = 1:num_loops
 for i = 1:num_images
     frequency_sample = frequency(edges(1,i):edges(2,i),edges(3,i):edges(4,i));
     frequency_sample = frequency_sample .* pupil_mask;
     spacial_sample = ifft_image(frequency_sample);
-    spacial_sample = abs(images(:,:,i)) .* exp( 1i * angle(spacial_sample) );
+    spacial_sample = sqrt(images(:,:,i)) .* exp( 1i * angle(spacial_sample) );
     frequency_sample_corrected = fft_image(spacial_sample);
-    frequency_sample = (1 - pupil_mask) .* frequency_sample + pupil_mask .* frequency_sample_corrected;
+    frequency_sample( pupil_mask == 1) = frequency_sample_corrected( pupil_mask == 1);
     frequency(edges(1,i):edges(2,i),edges(3,i):edges(4,i)) = frequency_sample;
     % If we have a reference, calculated errors
     if (nargin > 6)
         error = squared_error(reference, frequency);
-        errors(i) = error;
+        errors(i + num_images*(j-1)) = error;
     end
+end
 end
 image = ifft_image(frequency);
 rmpath('../util');

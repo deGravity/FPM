@@ -29,6 +29,7 @@ num_samples = size(frequency_samples, 3);
 images = [];
 for i = 1:num_samples
     image = ifft_image( frequency_samples(:,:,i) .* pupil_mask );
+    image = image .* conj(image);
     images = cat(3, images, image);
 end
 rmpath('../util');
