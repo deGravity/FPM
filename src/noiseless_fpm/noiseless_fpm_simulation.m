@@ -16,7 +16,7 @@ if nargin < 9
     min_kx = -1;
     max_kx = 1;
     num_kx = 20;
-    min_ky = 1;
+    min_ky = -1;
     max_ky = 1;
     num_ky = 20;
     k_radius = .5;
