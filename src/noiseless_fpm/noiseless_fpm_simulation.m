@@ -1,4 +1,4 @@
-function [ images, pupils ] = noiseless_fpm_simulation( amplitude_file, phase_file, min_kx, max_kx, num_kx, min_ky, max_ky, num_ky, k_radius )
+function [ images, pupils, reference ] = noiseless_fpm_simulation( amplitude_file, phase_file, min_kx, max_kx, num_kx, min_ky, max_ky, num_ky, k_radius )
 %NOISELESS_FPM_SIMULATION A very basic fpm simulation. Simulates physically
 %moving the pupil function in the Fourier domain
 %   amplitude_file - an image to use as the amplitude
@@ -43,6 +43,7 @@ for x=linspace(min_kx, max_kx, num_kx)
     end
 end
 
+reference = source;
 
 end
 
