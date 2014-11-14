@@ -17,7 +17,7 @@ pupils = build_pupils(pupil_data, aberrations);
 transform = fft_image(object);
 images = [];
 for i=1:size(pupils,3)
-    image = ifft_image( pupils(:,:,p) .* transform );
+    image = ifft_image( pupils(:,:,i) .* transform );
     image = image .* conj(image);
     images = cat(3, images, image);
 end

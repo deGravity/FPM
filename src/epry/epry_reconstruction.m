@@ -22,7 +22,7 @@ if nargin > 3
 end
 if nargin > 4
     doPupilError = true;
-    reference_pupil = make_pupil(pupil_data{3}, referenceAberrations);
+    reference_pupil = make_pupil(pupil_data{3}, reference_aberrations);
 end
 
 % Choose an index of a pupil near the center of the plane. We are relying
