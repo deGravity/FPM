@@ -22,10 +22,10 @@ end
 R = radial_zernike(abs(m), n);
 if ( m >= 0 )
     % Even Zernike Polynomial
-    Z = @(r, theta) R(r) * cos( m * theta );
+    Z = @(r, theta) R(r) .* cos( m * theta );
 else
     % Odd Zernike Polynomial
-    Z =  @(r, theta) R(r) * sin( abs(m) * theta );
+    Z =  @(r, theta) R(r) .* sin( abs(m) * theta );
 end
 
 end
