@@ -38,7 +38,7 @@ function R = radial_zernike(m, n)
     % do not vectorize well.
     coeffs = n:-1:0;
     for i=1:n+1
-        coeffs(i) = zernike_coefficient(m, n, i);
+        coeffs(i) = zernike_coefficient(m, n, coeffs(i));
     end
 
     R = @(r) polyval( coeffs, r );
@@ -81,7 +81,7 @@ m = 0;
 % Even modes start with 0 m.
 if ( mod(n, 2) == 0 )
     freq_num = freq_num - 1;
-    m = 2 * ceil(freq_num / 2)
+    m = 2 * ceil(freq_num / 2);
 else
     m = 2 * ceil( (freq_num ) / 2) - 1;
 end
