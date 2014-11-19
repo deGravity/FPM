@@ -17,8 +17,7 @@ beta = 1;
 
 object = create_test_image_unit_norms(amplitude_file, phase_file);
 [images, pupil_data] = epry_simulation(object, overlap, num_x, num_y, aberrations);
-[reconstruction, pupil, object_error, pupil_error] = epry_reconstruction(images, pupil_data, alpha, beta, iterations, object, aberrations, true); 
-
+[reconstruction, pupil, object_error, pupil_error] = epry_reconstruction(images, pupil_data, iterations, true, alpha, beta, size(aberrations,2), object, aberrations); 
 
 end
 

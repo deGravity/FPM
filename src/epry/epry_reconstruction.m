@@ -1,4 +1,4 @@
-function [object, pupil, object_errors, pupil_errors] = epry_reconstruction( images, pupil_data, alpha, beta, num_iterations, reference_object, reference_aberrations, doEPRY )
+function [object, pupil, object_errors, pupil_errors] = epry_reconstruction( images, pupil_data, num_iterations, doEPRY, alpha, beta,  projection_modes, reference_object, reference_aberrations )
 %EPRY_RECONSTRUCTION Reconstruct an FPM image with EPRY pupil recovery.
 %   images - The set of sampled images, ordered the same as the pupils in
 %       pupil-data
@@ -13,19 +13,29 @@ addpath('../util');
 
 % Initialize the error tracking as empty arrays. If references are given,
 % do error checking
-doObjectError = false;
-doPupilError = false;
+doObjectError = true;
+doPupilError = true;
 object_errors = zeros(1,num_iterations);
 pupil_errors = zeros(1,num_iterations);
-if nargin > 5
-    doObjectError = true;
+
+if nargin < 4
+    doEPRY = false;
+    alpha = 1;
+    beta = 1;
 end
-if nargin > 6
-    doPupilError = true;
-    reference_pupil = build_pupil(pupil_data{3}, reference_aberrations);
+if nargin < 7
+    projection_modes = 0;
+    doObjectError = false;
+    doPupilError = false;
 end
 if nargin < 8
-   doEPRY = false; 
+    doObjectError = false;
+end
+if nargin < 9
+    doPupilError = false;
+end
+if doPupilError
+    reference_pupil = build_pupil(pupil_data{3}, reference_aberrations);
 end
 
 % Choose an index of a pupil near the center of the plane. We are relying
@@ -55,6 +65,10 @@ perfect_pupil = build_pupil(pupil_data{3});
 % Initial Frequency Domain image
 frequency = fft_image(object);
 
+if projection_modes > 0
+    transform = zernike_transform(pupil_height, pupil_width, projection_modes);
+end
+
 % Iterate the EPRY loop several times over all images
 for i=1:num_iterations
     for j=1:size(images,3)
@@ -69,16 +83,21 @@ for i=1:num_iterations
         frequency_delta = updated_restricted_frequency - restricted_frequency;
         
         frequency_update = conj(pupil_mask) .* ( frequency_delta );
-        frequency_update = frequency_update / mmax( abs(pupil) )^2;
+        frequency_update = alpha * frequency_update / mmax( abs(pupil) )^2;
         
         if doEPRY
             pupil_update = conj(frequency) .* ( frequency_delta );
-            pupil_update = pupil_update / mmax( abs(frequency(perfect_pupil_mask == 1)) )^2;
+            pupil_update = beta * pupil_update / mmax( abs(frequency(perfect_pupil_mask == 1)) )^2;
         end
         
         frequency(perfect_pupil_mask == 1) = frequency(perfect_pupil_mask == 1) + frequency_update(perfect_pupil_mask == 1);
         if doEPRY
             pupil(perfect_pupil == 1) = pupil(perfect_pupil == 1) + pupil_update( perfect_pupil_mask == 1);
+            if projection_modes > 0
+                phase = angle(pupil);
+                [~, phase] = transform(phase); % Project onto the first several Zernike modes
+                pupil = perfect_pupil .* exp( 1i * phase);
+            end
         end
     end
     if doObjectError
