@@ -1,4 +1,4 @@
-function [object, pupil, object_errors, pupil_errors] = epry_reconstruction( images, pupil_data, num_iterations, reference_object, reference_aberrations )
+function [object, pupil, object_errors, pupil_errors] = epry_reconstruction( images, pupil_data, alpha, beta, num_iterations, reference_object, reference_aberrations, doEPRY )
 %EPRY_RECONSTRUCTION Reconstruct an FPM image with EPRY pupil recovery.
 %   images - The set of sampled images, ordered the same as the pupils in
 %       pupil-data
@@ -17,12 +17,15 @@ doObjectError = false;
 doPupilError = false;
 object_errors = zeros(1,num_iterations);
 pupil_errors = zeros(1,num_iterations);
-if nargin > 3
+if nargin > 5
     doObjectError = true;
 end
-if nargin > 4
+if nargin > 6
     doPupilError = true;
-    reference_pupil = make_pupil(pupil_data{3}, reference_aberrations);
+    reference_pupil = build_pupil(pupil_data{3}, reference_aberrations);
+end
+if nargin < 8
+   doEPRY = false; 
 end
 
 % Choose an index of a pupil near the center of the plane. We are relying
@@ -43,10 +46,11 @@ width = size(object,2);
 height = size(object, 1);
 
 % Build an initial pupil guess
-pupil = build_pupil(pupil_data{3});
+pupil = double(build_pupil(pupil_data{3}));
 
 % Keep a perfect pupil for masking
 perfect_pupil = build_pupil(pupil_data{3});
+[pupil_height, pupil_width] = size(perfect_pupil);
 
 % Initial Frequency Domain image
 frequency = fft_image(object);
@@ -58,12 +62,24 @@ for i=1:num_iterations
         pupil_mask = position_pupil(width, height, pupil, x, y);
         perfect_pupil_mask = position_pupil(width, height, perfect_pupil, x, y);
         
-        filtered_frequency = pupil_mask .* frequency;
-        filtered_spacial = ifft_image(filtered_frequency);
-        filtered_spacial = sqrt(images(:,:,j)) .* exp( 1i * angle(filtered_spacial));
-        filtered_frequency = fft_image(filtered_spacial);
-        frequency( perfect_pupil_mask == 1) = filtered_frequency( perfect_pupil_mask == 1);
-         
+        restricted_frequency = pupil_mask .* frequency;
+        restricted_image = ifft_image(restricted_frequency);
+        restricted_image = sqrt(images(:,:,j)) .* exp( 1i * angle(restricted_image) );
+        updated_restricted_frequency = fft_image(restricted_image);
+        frequency_delta = updated_restricted_frequency - restricted_frequency;
+        
+        frequency_update = conj(pupil_mask) .* ( frequency_delta );
+        frequency_update = frequency_update / mmax( abs(pupil) )^2;
+        
+        if doEPRY
+            pupil_update = conj(frequency) .* ( frequency_delta );
+            pupil_update = pupil_update / mmax( abs(frequency(perfect_pupil_mask == 1)) )^2;
+        end
+        
+        frequency(perfect_pupil_mask == 1) = frequency(perfect_pupil_mask == 1) + frequency_update(perfect_pupil_mask == 1);
+        if doEPRY
+            pupil(perfect_pupil == 1) = pupil(perfect_pupil == 1) + pupil_update( perfect_pupil_mask == 1);
+        end
     end
     if doObjectError
         object = ifft_image(frequency);

@@ -7,6 +7,8 @@ function pupil = extract_pupil( x, y, w, h, mask )
 %   h - the height of the pupil
 %   mask - the mask that the pupil is embedded in
 
+width = size(mask, 2);
+height = size(mask, 1);
 
 % TODO - Refactor to remove code-duplication in position_pupil - create a
 % third function which determines the bounds of a pupil in another image.
