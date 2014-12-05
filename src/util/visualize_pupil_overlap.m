@@ -3,6 +3,6 @@ function visualize_pupil_overlap( pupils )
 %as a heatmap and displays.
 %   pupils - an collection of pupil functions
 all_pupils = sum(pupils, 3);
-figure;imagesc(all_pupils);
+figure;imagesc(abs(all_pupils));
 end
 
