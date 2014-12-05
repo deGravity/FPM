@@ -10,7 +10,7 @@ addpath('../util');
 overlap = .75;
 num_x = 10;
 num_y = 10;
-aberrations = pscale * [1, .8, .7, .6, .5, .4, .3, .2];
+aberrations = pscale * [0, .8, .7, .6, .5, .4, .3, .2];
 iterations = 16;
 alpha = 1;
 beta = 1;

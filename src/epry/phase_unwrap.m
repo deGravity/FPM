@@ -35,6 +35,6 @@ end
 end
 
 function wrap = W(x)
-    wrap = -1*mod(x, pi)*sign(x);
+    wrap = mod(x, pi)*sign(x);
 end
 
