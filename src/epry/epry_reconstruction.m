@@ -93,20 +93,26 @@ for i=1:num_iterations
         frequency(perfect_pupil_mask == 1) = frequency(perfect_pupil_mask == 1) + frequency_update(perfect_pupil_mask == 1);
         if doEPRY
             pupil(perfect_pupil == 1) = pupil(perfect_pupil == 1) + pupil_update( perfect_pupil_mask == 1);
-            if projection_modes > 0
-                phase = angle(pupil);
-                [~, phase] = transform(phase); % Project onto the first several Zernike modes
-                pupil = perfect_pupil .* exp( 1i * phase);
-            end
+        end
+    end
+    if doEPRY
+        if projection_modes > 0
+           phase = unwrap_pupil(pupil, perfect_pupil);
+           [~, phase] = transform(phase); % Project onto the first several Zernike modes
+           pupil = perfect_pupil .* exp( 1i * phase);
         end
     end
     if doObjectError
         object = ifft_image(frequency);
-        error = squared_error(reference_object, object);
-        object_errors(i) = error;
+        %error = squared_error(reference_object, object);
+        %object_errors(i) = error;
+        % EPRY Statistics
+        a = ssum(reference_object .* conj(object)) / ssum( abs(object).^2 );
+        esquared = ssum( abs(reference_object - a * object) .^2 ) / ssum( abs(reference_object).^2 );
+        object_errors(i) = esquared;
     end
     if doPupilError
-        error = squared_error(reference_pupil, pupil);
+        error = squared_error(angle(reference_pupil), angle(pupil));
         pupil_errors(i) = error;
     end
 end
