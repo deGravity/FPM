@@ -18,6 +18,10 @@ classdef epry_parameters
         object;
     end
     
+    properties (Dependent)
+        aberration_energy;
+    end
+    
     properties (Hidden)
         hidden_object = [];
     end
@@ -33,6 +37,18 @@ classdef epry_parameters
                 obj.hidden_object = create_test_image_unit_norms(obj.amp, obj.phase);
             end
             value = obj.hidden_object;
+        end
+        
+        function value = get.aberration_energy(obj)
+            addpath('../util');
+            value = norm_disk_l2(build_aberration(20,obj.aberrations));
+        end
+        
+        function obj = set.aberration_energy(obj, value)
+            addpath('../util');
+            energy = norm_disk_l2(build_aberration(20,obj.aberrations));
+            multiplier = value / energy;
+            obj.aberrations = obj.aberrations * multiplier;
         end
     end
 end

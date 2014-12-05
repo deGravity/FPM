@@ -6,16 +6,14 @@ function pupil = build_pupil( radius, aberrations )
 
 % Create a polar-coordinate mesh grid
 [X, Y] = scaled_meshgrid(2*radius, 2*radius, 2, 2); 
-[R, THETA] = polar_meshgrid(X, Y);
+[R, ~] = polar_meshgrid(X, Y);
 pupil = (R <= 1);
 
 % If we have aberration coefficients, add them into the phase of the filter
 if (nargin > 1) && (size(aberrations, 2) > 0)
+    aberration = build_aberration(radius, aberrations);
     pupil = complex(double(pupil));
-    for i=1:size(aberrations, 2)
-        Z = zernike(i);
-        pupil = pupil .* exp( 1i * aberrations(i) * Z(R, THETA) );
-    end
+    pupil = pupil .* exp( 1i * aberration );
 end
 
 end
