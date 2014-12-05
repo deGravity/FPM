@@ -34,6 +34,9 @@ end
 if nargin < 9
     doPupilError = false;
 end
+if doObjectError
+    reference_frequency = fft_image(reference_object);
+end
 if doPupilError
     reference_pupil = build_pupil(pupil_data{3}, reference_aberrations);
 end
@@ -66,7 +69,6 @@ perfect_pupil = build_pupil(pupil_data{3});
 frequency = fft_image(object);
 
 if projection_modes > 0
-    filt = [ [.1 .1 .1]; [.1 .2 .1]; [.1 .1 .1] ];
     transform = zernike_transform(pupil_height, pupil_width, projection_modes);
 end
 
@@ -94,25 +96,18 @@ for i=1:num_iterations
         frequency(perfect_pupil_mask == 1) = frequency(perfect_pupil_mask == 1) + frequency_update(perfect_pupil_mask == 1);
         if doEPRY
             pupil(perfect_pupil == 1) = pupil(perfect_pupil == 1) + pupil_update( perfect_pupil_mask == 1);
+            if projection_modes > 0
+                phase = angle(pupil);
+                [~, phase] = transform(phase); % Project onto the first several Zernike modes
+                pupil = perfect_pupil .* exp( 1i * phase);
+            end
         end
     end
-    if doEPRY
-        if projection_modes > 0
-            %phase = angle(pupil);
-            %phase = conv2(phase, filt, 'same');
-            %phase = unwrap(unwrap(phase)')';
-            phase = phase_unwrap(angle(pupil), perfect_pupil, 0.013);
-            [~, phase] = transform(phase); % Project onto the first several Zernike modes
-            pupil = perfect_pupil .* exp( 1i * phase);
-        end
-    end
+
     if doObjectError
-        object = ifft_image(frequency);
-        %error = squared_error(reference_object, object);
-        %object_errors(i) = error;
         % EPRY Statistics
-        a = ssum(reference_object .* conj(object)) / ssum( abs(object).^2 );
-        esquared = ssum( abs(reference_object - a * object) .^2 ) / ssum( abs(reference_object).^2 );
+        a = ssum(reference_frequency .* conj(frequency)) / ssum( abs(frequency).^2 );
+        esquared = ssum( abs(reference_frequency - a * frequency) .^2 ) / ssum( abs(reference_frequency).^2 );
         object_errors(i) = esquared;
     end
     if doPupilError
