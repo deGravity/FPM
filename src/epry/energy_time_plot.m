@@ -22,8 +22,8 @@ for j=1:spaces
     end
 end
 
-% t=sum(time, 3)/4;
-% s=sum(t,2)/4;
-% plot(overlap, s);
-% xlabel('Overlap %');
-% ylabel('Time to Convergence');
+t=sum(time, 3)/4;
+s=sum(t,2)/4;
+plot(energy, s);
+xlabel('Aberration "Energy"');
+ylabel('Time to Convergence');
