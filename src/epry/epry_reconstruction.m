@@ -1,4 +1,4 @@
-function [object, pupil, object_errors, pupil_errors] = epry_reconstruction( images, pupil_data, num_iterations, doEPRY, alpha, beta,  projection_modes, reference_object, reference_aberrations )
+function [object, pupil, object_errors, pupil_errors] = epry_reconstruction( images, pupil_data, num_iterations, threshold, doEPRY, alpha, beta,  projection_modes, reference_object, reference_aberrations )
 %EPRY_RECONSTRUCTION Reconstruct an FPM image with EPRY pupil recovery.
 %   images - The set of sampled images, ordered the same as the pupils in
 %       pupil-data
@@ -15,23 +15,23 @@ addpath('../util');
 % do error checking
 doObjectError = true;
 doPupilError = true;
-object_errors = zeros(1,num_iterations);
-pupil_errors = zeros(1,num_iterations);
+object_errors = [];
+pupil_errors = [];
 
-if nargin < 4
+if nargin < 5
     doEPRY = false;
     alpha = 1;
     beta = 1;
 end
-if nargin < 7
+if nargin < 8
     projection_modes = 0;
     doObjectError = false;
     doPupilError = false;
 end
-if nargin < 8
+if nargin < 9
     doObjectError = false;
 end
-if nargin < 9
+if nargin < 10
     doPupilError = false;
 end
 if doObjectError
@@ -71,7 +71,9 @@ frequency = fft_image(object);
 if projection_modes > 0
     transform = zernike_transform(pupil_height, pupil_width, projection_modes);
 end
-
+if threshold > 0
+    previous_frequency = zeros(size(frequency));
+end
 % Iterate the EPRY loop several times over all images
 for i=1:num_iterations
     for j=1:size(images,3)
@@ -102,6 +104,14 @@ for i=1:num_iterations
                 pupil = perfect_pupil .* exp( 1i * phase);
             end
         end
+    end
+    
+    if threshold > 0
+        diff = squared_error(previous_frequency, frequency);
+        if diff < threshold
+            break;
+        end
+        previous_frequency = frequency;
     end
 
     if doObjectError
