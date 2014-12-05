@@ -3,8 +3,8 @@
 %define parameters 
 scaler=.3; %percentage increase per iteration
 itermax= 10; %number of iterations
-ampfile= 'beyonce.png'; %amplitude file
-phafile= 'cameraman.jpg'; %phase file
+ampfile= '..images/beyonce.png'; %amplitude file
+phafile= '../images/cameraman.jpg'; %phase file
 
 for j=0:itermax
      pscale=1+j*scaler;
