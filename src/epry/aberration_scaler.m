@@ -8,7 +8,7 @@ phafile= '../images/cameraman.jpg'; %phase file
 
 for j=0:itermax
      pscale=1+j*scaler;
-     [recon, pupil, oi, op, oe, pe]=run_epry(ampfile, phafile, pscale);
+     [recon, pupil, oi, op, oe, pe]=run_epry(ampfile, phafile, pscale, 0.75);
      
      figure
      title(['Pupil Scale' num2str(1+j*scaler)])

@@ -13,15 +13,17 @@ overlap=linspace(overlap_start, overlap_end, spaces);
 %load images
 epry = zeros(spaces, 2*size(image_sizes,2));
 for j=1:spaces
-    for k=1:size(image_sizes, 2)
-        for l=1:2
-        amp=([num2str(image_sizes(k)) '-' num2str((2*l)-1) '.jpg']);
+    for k=1:1 %size(image_sizes, 2)
+        for l=1:4
+            for m=1:4
+                amp=(['../images/' num2str(image_sizes(k)) '-' num2str(l) '.jpg']);
         
-        pha=([num2str(image_sizes(k)) '-' num2str(2*l) '.jpg']);
+                pha=(['../images/' num2str(image_sizes(k)) '-' num2str(m) '.jpg']);
         
-        [recon, pupil, oi, op, oe, pe]=run_epry(amp, pha, pscale, overlap(j));
+                [recon, pupil, oi, op, oe, pe]=run_epry(amp, pha, pscale, overlap(j));
         
-        epry(j,k,l) = oe(size(oe,2)) ;
+                epry(j,k,l) = oe(size(oe,2)) ;
+            end
         end
     end
 end

@@ -1,4 +1,4 @@
-function [ reconstruction, pupil, original_image, original_pupil, object_error, pupil_error ] = run_epry( amplitude_file, phase_file, pscale )
+function [ reconstruction, pupil, original_image, original_pupil, object_error, pupil_error ] = run_epry( amplitude_file, phase_file, pscale, over )
 %RUN_EPRY Run simulation and reconstruction for given amplitude and phase
 %images.
 %   amplitude_file - path to image for amplitude signal
@@ -7,7 +7,7 @@ function [ reconstruction, pupil, original_image, original_pupil, object_error, 
 addpath('../util');
 
 % The parameters
-overlap = .75;
+overlap = over;
 num_x = 10;
 num_y = 10;
 aberrations = pscale * [0, .8, .7, .6, .5, .4, .3, .2];
