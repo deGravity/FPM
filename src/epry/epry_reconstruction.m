@@ -66,6 +66,7 @@ perfect_pupil = build_pupil(pupil_data{3});
 frequency = fft_image(object);
 
 if projection_modes > 0
+    filt = [ [.1 .1 .1]; [.1 .2 .1]; [.1 .1 .1] ];
     transform = zernike_transform(pupil_height, pupil_width, projection_modes);
 end
 
@@ -97,9 +98,12 @@ for i=1:num_iterations
     end
     if doEPRY
         if projection_modes > 0
-           phase = unwrap_pupil(pupil, perfect_pupil);
-           [~, phase] = transform(phase); % Project onto the first several Zernike modes
-           pupil = perfect_pupil .* exp( 1i * phase);
+            %phase = angle(pupil);
+            %phase = conv2(phase, filt, 'same');
+            %phase = unwrap(unwrap(phase)')';
+            phase = phase_unwrap(angle(pupil), perfect_pupil, 0.013);
+            [~, phase] = transform(phase); % Project onto the first several Zernike modes
+            pupil = perfect_pupil .* exp( 1i * phase);
         end
     end
     if doObjectError
