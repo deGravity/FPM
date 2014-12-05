@@ -1,4 +1,4 @@
-function [object, pupil, object_errors, pupil_errors] = epry_reconstruction( images, pupil_data, num_iterations, threshold, doEPRY, alpha, beta,  projection_modes, reference_object, reference_aberrations )
+function [object, pupil, object_errors, pupil_errors, zernike_modes] = epry_reconstruction( images, pupil_data, num_iterations, threshold, doEPRY, alpha, beta,  projection_modes, reference_object, reference_aberrations )
 %EPRY_RECONSTRUCTION Reconstruct an FPM image with EPRY pupil recovery.
 %   images - The set of sampled images, ordered the same as the pupils in
 %       pupil-data
@@ -17,6 +17,7 @@ doObjectError = true;
 doPupilError = true;
 object_errors = [];
 pupil_errors = [];
+zernike_modes = [];
 
 if nargin < 5
     doEPRY = false;
@@ -100,7 +101,7 @@ for i=1:num_iterations
             pupil(perfect_pupil == 1) = pupil(perfect_pupil == 1) + pupil_update( perfect_pupil_mask == 1);
             if projection_modes > 0
                 phase = angle(pupil);
-                [~, phase] = transform(phase); % Project onto the first several Zernike modes
+                [zernike_modes, phase] = transform(phase); % Project onto the first several Zernike modes
                 pupil = perfect_pupil .* exp( 1i * phase);
             end
         end

@@ -18,13 +18,8 @@ beta = 1;
 
 object = create_test_image_unit_norms(amplitude_file, phase_file);
 
-%pha=fspecial('gauss',size(object),round( (size(object, 1) * 128 / 20)));
-%wrap=4;
-%pha=wrap*2*pi*pha/max(max(pha));
-%object = abs(object) .* exp( 1i * pha);
-
 [images, pupil_data] = epry_simulation(object, overlap, num_x, num_y, aberrations);
-[reconstruction, pupil, object_error, pupil_error] = epry_reconstruction(images, pupil_data, iterations, threshold, true, alpha, beta, size(aberrations,2), object, aberrations); 
+[reconstruction, pupil, object_error, pupil_error, ~] = epry_reconstruction(images, pupil_data, iterations, threshold, true, alpha, beta, size(aberrations,2), object, aberrations); 
 original_image = object;
 original_pupil = build_pupil(pupil_data{3}, aberrations);
 end
